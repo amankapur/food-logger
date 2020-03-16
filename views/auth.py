@@ -1,6 +1,6 @@
 import functools
 from flask import Blueprint, make_response, jsonify, session, redirect, url_for, render_template, request
-from config import get_app
+from config import db
 from model import User
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
@@ -10,7 +10,7 @@ def login_required(view):
 
 	@functools.wraps(view)
 	def wrapped_view(**kwargs):
-		if session.get('user') is None:
+		if session.get('user_id') is None:
 			return redirect(url_for('auth.login'))
 
 		return view(**kwargs)
@@ -19,7 +19,7 @@ def login_required(view):
 
 
 
-@auth_bp.route('/signup', methods=['GET', 'POST'])
+@auth_bp.route('/signup',  methods=['GET', 'POST'])
 def signup():
 	if request.method == 'POST':
 		data = request.form.to_dict()
@@ -29,8 +29,6 @@ def signup():
 		password = data['password']
 
 		new_user = User(name=name, email=email)
-		app, db = get_app()
-
 		user = User.get_by_email(email)
 
 		if user:
@@ -74,11 +72,18 @@ def login():
 			r.headers['Content-Type'] = 'application/json'
 			return r
 
-		session['user'] = user
+		session['user_id'] = user.id
 		data = {'msg': 'Successfully logged in'}
 		r = make_response(jsonify(data), 200)
 		r.headers['Content-Type'] = 'application/json'
 		return r
 
-
 	return render_template('auth.html')
+
+@auth_bp.route('/logout')
+def logout():
+	del session['user_id']
+	data = {'msg': 'Successfully logged out'}
+	r = make_response(jsonify(data), 200)
+	r.headers['Content-Type'] = 'application/json'
+	return r

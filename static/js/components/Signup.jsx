@@ -36,7 +36,7 @@ export default class Signup extends Component {
 			dataType: 'json',
 			data: this.state,
 			success: (data) => {
-				window.location = data['redirect_to']
+				window.location = "/auth/login"
 			},
 			fail: (data) => {
 				console.log(data)

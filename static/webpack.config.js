@@ -9,7 +9,7 @@ const config = {
 		publicPath: resolve('../public')
 	},
 	resolve: {
-		extensions: ['.js','.jsx','.css']
+		extensions: ['.js','.jsx','.css', '.less']
 	},
 	module: {
 	  rules: [
@@ -23,8 +23,18 @@ const config = {
 	  	},
 	  	{
 				test: /\.css$/,
-				loader: 'style-loader!css-loader?modules'
-  		}
+				use: [
+					{ loader: "style-loader" }
+				]
+  		},
+  		{
+	  		test: /\.s[ac]ss$/i,
+        use: [
+          'style-loader',
+          'css-loader',
+          'sass-loader',
+        ],
+	    }
 	  ]
 	}
 };

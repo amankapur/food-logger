@@ -30,7 +30,7 @@ export default class Login extends Component {
 			dataType: 'json',
 			data: this.state,
 			success: (data) => {
-				window.location = data['redirect_to']
+				window.location = "/"
 			},
 			fail: (data) => {
 				console.log(data)
@@ -64,7 +64,7 @@ export default class Login extends Component {
 								onClick={this.submitForm}
 								className="btn btn-primary">Submit</button>
 				<Link to="/auth/signup/">
-					<button className="btn btn-primary">Sign Up</button>				
+					<button className="btn btn-primary">Sign Up</button>
 				</Link>
 			</form>
      )

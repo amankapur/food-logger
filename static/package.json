@@ -17,12 +17,17 @@
     "@babel/preset-es2015": "^7.0.0-beta.53",
     "@babel/preset-react": "^7.8.3",
     "babel-loader": "^8.0.6",
+    "bootstrap": "^4.4.1",
     "css-loader": "^3.4.2",
     "history": "^4.10.1",
     "jquery": "^3.4.1",
+    "node-sass": "^4.13.1",
+    "popper.js": "^1.16.1",
     "react": "^16.13.0",
     "react-dom": "^16.13.0",
-    "style-loader": "^1.1.3"
+    "sass-loader": "^8.0.2",
+    "style-loader": "^1.1.3",
+    "webpack": "^4.42.0"
   },
   "dependencies": {
     "react-router-dom": "^5.1.2"

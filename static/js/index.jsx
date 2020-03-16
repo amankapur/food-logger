@@ -4,6 +4,9 @@ import { BrowserRouter, Route } from 'react-router-dom';
 import Signup from './components/Signup';
 import Login from './components/Login';
 
+import style from '../css/auth.scss'
+
+
 const App = (
 	<div>
 		<h1> Main App </h1>
