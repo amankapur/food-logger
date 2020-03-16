@@ -1,0 +1,30 @@
+{
+  "name": "food-logger",
+  "version": "1.0.0",
+  "description": "Food Loggin App ",
+  "main": "js/index.jsx",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack -p --progress --config webpack.config.js",
+    "dev-build": "webpack --progress -d --config webpack.config.js",
+    "watch": "webpack --progress -d --config webpack.config.js --watch"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.8.7",
+    "@babel/preset-es2015": "^7.0.0-beta.53",
+    "@babel/preset-react": "^7.8.3",
+    "babel-loader": "^8.0.6",
+    "css-loader": "^3.4.2",
+    "history": "^4.10.1",
+    "jquery": "^3.4.1",
+    "react": "^16.13.0",
+    "react-dom": "^16.13.0",
+    "style-loader": "^1.1.3"
+  },
+  "dependencies": {
+    "react-router-dom": "^5.1.2"
+  }
+}
