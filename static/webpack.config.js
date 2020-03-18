@@ -2,10 +2,13 @@ const webpack = require('webpack');
 const resolve = require('path').resolve;
 const config = {
 	devtool: 'eval-source-map',
-	entry: __dirname + '/js/index.jsx',
+	entry: {
+		'app': __dirname + '/js/index.jsx',
+		'auth': __dirname + '/js/auth.jsx'
+	},
 	output:{
 		path: resolve('../public'),
-		filename: 'bundle.js',
+		filename: '[name]_bundle.js',
 		publicPath: resolve('../public')
 	},
 	resolve: {

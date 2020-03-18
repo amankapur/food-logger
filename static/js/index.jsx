@@ -1,19 +1,18 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter, Route } from 'react-router-dom';
-import Signup from './components/Signup';
-import Login from './components/Login';
+import MealList from './components/MealList';
+import TopNav from './components/TopNav';
 
-import style from '../css/auth.scss'
-
+import style from '../css/app.scss'
 
 const App = (
-	<div>
-		<h1> Main App </h1>
+	<div id="container" className="d-flex justify-content-center">
+		<TopNav />
 		<BrowserRouter >
-			<div>
-				<Route path='/auth/signup' component={Signup} />
-				<Route path='/auth/login' component={Login} />
+			<div id="content">
+				<Route path='/' component={MealList} />
+				{/*<Route path='/meal/:meal_id' component={Meal} />*/}
 			</div>
 		</BrowserRouter>
 	</div>

@@ -51,23 +51,16 @@ export default class Signup extends Component {
 			<form>
 				<h2> Signup </h2>
 				<div className="form-group">
-					<label >Name</label>
 					<input type="name"
 								className="form-control"
 								placeholder="Enter name"
 								value={this.state.name}
 								onChange={this.setName}/>
-				</div>
-				<div className="form-group">
-					<label >Email address</label>
 					<input type="email"
 								className="form-control"
 								placeholder="Enter email"
 								value={this.state.email}
 								onChange={this.setEmail}/>
-				</div>
-				<div className="form-group">
-					<label >Password</label>
 					<input type="password"
 								className="form-control"
 								placeholder="Password"

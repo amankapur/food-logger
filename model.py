@@ -23,6 +23,10 @@ class User(db.Model):
 	def get_by_email(email):
 		return db.session.query(User).filter_by(email=email).scalar()
 
+	@staticmethod
+	def get_by_id(id):
+		return db.session.query(User).filter_by(id=id).scalar()		
+
 
 class FoodItem(db.Model):
 	id = db.Column(db.Integer, primary_key=True)

@@ -45,27 +45,25 @@ export default class Login extends Component {
 			<form>
 				<h2> Login </h2>
 				<div className="form-group">
-					<label >Email address</label>
 					<input type="email"
 								className="form-control"
 								placeholder="Enter email"
 								value={this.state.email}
 								onChange={this.setEmail}/>
-				</div>
-				<div className="form-group">
-					<label >Password</label>
 					<input type="password"
 								className="form-control"
 								placeholder="Password"
 								value={this.state.password}
 								onChange={this.setPassword}/>
 				</div>
-				<button type="submit"
-								onClick={this.submitForm}
-								className="btn btn-primary">Submit</button>
 				<Link to="/auth/signup/">
 					<button className="btn btn-primary">Sign Up</button>
 				</Link>
+				
+				<button type="submit"
+								onClick={this.submitForm}
+								className="btn btn-primary">Submit</button>
+
 			</form>
      )
   }
