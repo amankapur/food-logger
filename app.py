@@ -43,7 +43,7 @@ def meal(id):
 
 	user_id = session.get('user_id')
 	user = User.get_by_id(user_id)
-	
+
 	data = request.form.to_dict()
 
 	meal.name = data['meal-type']
@@ -68,23 +68,24 @@ def create_meal():
 		user_id = session.get('user_id')
 		user = User.get_by_id(user_id)
 
-		data = request.form.to_dict()
+		data = request.json
 
 		meal_name = data['meal-type']
 		meal_date= get_datetime_from_str(data['meal-date'])
-		fooditem_name = data['food-name']
-		fooditem_portionsize = data['portion-size']
-		fooditeam_calories = data['calories']
-
 
 		meal = Meal(name=meal_name, date=meal_date)
 		meal.user = user
 
-		fooditem = FoodItem(name=fooditem_name, portionsize=fooditem_portionsize, calories=fooditeam_calories)
-		fooditem.meal = meal
-
 		db.session.add(meal)
-		db.session.add(fooditem)
+
+		for fo in data['fooditems']:
+			fooditem_name = fo['food-name']
+			fooditem_portionsize = fo['portion-size']
+			fooditeam_calories = fo['calories']
+			fooditem = FoodItem(name=fooditem_name, portionsize=fooditem_portionsize, calories=fooditeam_calories)
+			fooditem.meal = meal
+			db.session.add(fooditem)
+
 		db.session.commit()
 
 		return make_response(jsonify(data = [m.serialize for m in user.meals]), 200)

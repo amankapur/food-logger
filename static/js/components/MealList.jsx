@@ -4,169 +4,7 @@ import _ from 'underscore'
 import Modal from '../util/Modal'
 import Icons from '../util/Icons'
 import Loading from '../util/Loading'
-
-class Meal extends Component {
-
-	getEmptyMeal() {
-		let today = new Date();
-		let dd = String(today.getDate()).padStart(2, '0');
-		let mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
-		let yyyy = today.getFullYear();
-
-		return {
-			'meal-type': '',
-			'food-name': '',
-			'portion-size': '',
-			'calories': '',
-			'meal-date': yyyy + '-' + mm + '-' + dd,
-		}
-
-	}
-	constructor(props) {
-		super(props)
-
-		this.state = this.getEmptyMeal()
-		this.state['loading'] = false
-		this.state['showModal'] = false
-
-		this.saveMeal = this.saveMeal.bind(this)
-		this.clickedButton = this.clickedButton.bind(this)
-		this.showModal = this.showModal.bind(this)
-		this.hideModal = this.hideModal.bind(this)
-	}
-
-	componentDidUpdate(prevProps, prevState) {
-
-		if (prevProps.id != this.props.id && this.props.id != null) {
-			this.getMeal(this.props.id)
-		}
-
-	}
-
-	getSetFunc(name, e) {
-		const self = this
-		return (e) => {
-			e.preventDefault()
-			self.state[name] = e.target.value
-			self.setState(self.state)
-		}
-	}
-
-	getMeal(id) {
-		const self = this
-		this.state['loading'] = true
-		this.state['showModal'] = true
-		this.setState(this.state)
-		$.get({
-			url: '/meal/'+ id,
-			success: (data) => {
-				let meal = data['data']
-				let state = {
-					'meal-type': meal['meal-name'],
-					'food-name': meal['fooditems'][0]['fooditem_name'],
-					'portion-size': meal['fooditems'][0]['portionsize'],
-					'calories': meal['fooditems'][0]['calories'],
-					'meal-date': meal['date'],
-					'loading': false,
-					'showModal': true
-				}
-				console.log(state)
-				self.setState(state)
-			}
-		})
-	}
-
-	saveMeal() {
-		const self = this
-		return $.post({
-			url: self.props.id ? '/meal/'+self.props.id : '/create_meal',
-			data: self.state,
-			success: (data) => {
-				self.props.changeCallback(data['data'])
-				console.log(data)
-				self.state['loading'] = false
-				self.state['showModal'] = false
-				self.setState(self.state)
-			}
-		})
-	}
-
-	clickedButton(tp) {
-		if (tp == 'Save') {
-			this.state['loading'] = true
-			this.setState(this.state)
-			this.saveMeal()
-		}
-	}
-
-	showModal() {
-		this.state['showModal'] = true
-		this.setState(this.state)
-	}
-
-	hideModal() {
-		this.state = this.getEmptyMeal()
-		this.state['loading'] = false
-		this.state['showModal'] = false
-		this.setState(this.state)
-		this.props.hideCallback()
-	}
-
-	render() {
-		let title = this.props.id ? "Edit Meal " + this.props.id : "Add Meal"
-		return (
-			<Modal buttonTitle="+ Add Meal"
-						 header={<h4 className="modal-title">{title}</h4>}
-						 footer={["Save", "Close"]}
-						 footerCallback={this.clickedButton}
-						 modalDialogClass={this.state.loading ? 'spinner-overlay': ''}
-						 centered
-						 open={this.state.showModal}
-						 hideModal={this.hideModal}
-						 showModal={this.showModal}>
-				<Loading show={this.state.loading}/>
-				<div className="meal-container">
-					<select value={this.state['meal-type']}
-									onChange={this.getSetFunc('meal-type')}
-									className="custom-select">
-	          <option value = '' disabled>Select Meal Type</option>
-						<option value = 'Breakfast'>Breakfast</option>
-						<option value = 'Lunch'>Lunch</option>
-						<option value = 'Dinner'>Dinner</option>
-						<option value = 'Snack'>Snack</option>
-					</select>
-
-					<input
-							className="form-control"
-							placeholder="Enter food name"
-							value={this.state['food-name']}
-							onChange={this.getSetFunc('food-name')}
-							name="food-name"/>
-					<input
-							className="form-control"
-							placeholder="Enter portion size"
-							value={this.state['portion-size']}
-							onChange={this.getSetFunc('portion-size')}
-							name="portion-size"/>
-					<input
-							className="form-control"
-							placeholder="Enter calolries"
-							type="number"
-							value={this.state.calories}
-							onChange={this.getSetFunc('calories')}
-							name="calolries"/>
-					<input
-							className="form-control"
-							placeholder="Enter meal date"
-							value={this.state['meal-date']}
-							onChange={this.getSetFunc('meal-date')}
-							name="meal-date"/>
-				</div>
-			</Modal>
-		)
-	}
-}
-
+import Meal from './Meal'
 
 export default class MealList extends Component {
 
@@ -194,7 +32,8 @@ export default class MealList extends Component {
 		this.state = {
 			loading: true,
 			mealList: [],
-			mealID: null
+			mealID: null,
+			expanded: []
 		}
 		this.get_list()
 		this.listChange = this.listChange.bind(this)
@@ -215,28 +54,89 @@ export default class MealList extends Component {
 
 	deleteMeal(id) {
 		const self = this
-		return $.post({
-			url: '/delete_meal/' + id,
-			success: (data) => {
-				console.log('successfully deleted meal')
-				self.listChange(data['data'])
-			}
-		})
-	}
-
-	getDeleteMealFunc(id) {
-		const self = this
-		return () => {
-			return self.deleteMeal(id)
+		return (e) => {
+			e.preventDefault()
+			e.stopPropagation()
+			return $.post({
+				url: '/delete_meal/' + id,
+				success: (data) => {
+					console.log('successfully deleted meal')
+					self.listChange(data['data'])
+				}
+			})
 		}
 	}
-	getEditMealFunc(id) {
+	editMeal(id) {
 		const self = this
-		return () => {
+		return (e) => {
+			e.preventDefault()
+			e.stopPropagation()
 			self.state['mealID'] = id
 			self.setState(self.state)
 		}
 	}
+	toggleExpand(meal) {
+		return () => {
+			if (this._isExpanded(meal)) {
+				this.state.expanded = _.without(this.state.expanded, meal.id)
+			} else{
+				this.state.expanded.push(meal.id)
+			}
+			this.setState(this.state)
+		}
+	}
+	_isExpanded(meal) {
+		return _.indexOf(this.state.expanded, meal.id) != -1
+	}
+
+	getMainRow(meal) {
+
+		return (
+			<tr className="pointer" key={meal.id} onClick={this.toggleExpand(meal)}>
+				<td>{this._isExpanded(meal) ? Icons.down() : Icons.right()} {meal.id}</td>
+				<td>{meal.date}</td>
+				<td>{meal['meal-name']}</td>
+				<td>{meal['total-calories']}</td>
+				<td>
+					<span className="icon-tray">
+						<span className="icon" onClick={this.deleteMeal(meal.id)}>
+							{Icons.trash()}
+						</span>
+						<span className="icon" onClick={this.editMeal(meal.id)}>
+							{Icons.edit()}
+						</span>
+					</span>
+				</td>
+			</tr>
+		)
+	}
+
+	getExpandedRow(fooditem) {
+		let key = fooditem['meal-id'] + '.' + fooditem.id
+		return (
+			<tr key={key} className="inner">
+				<td></td>
+				<td></td>
+				<td>{fooditem['food-name']}</td>
+				<td>{fooditem.calories + ' (' + fooditem['portion-size'] + ')'}</td>
+				<td></td>
+			</tr>
+		)
+	}
+	getTrList() {
+		let list = []
+		_.each(this.state.mealList, (meal) => {
+			list.push(this.getMainRow(meal))
+
+			if (this._isExpanded(meal)) {
+				_.each(meal.fooditems, (fooditem) => {
+					list.push(this.getExpandedRow(fooditem))
+				})
+			}
+		})
+		return list
+	}
+
 	render() {
 		return (
 			<div>
@@ -253,24 +153,7 @@ export default class MealList extends Component {
 							</tr>
 							</thead>
 							<tbody>
-							{_.map(this.state.mealList, (meal) => {
-								return (
-									<tr key={meal.id}>
-										<td>{meal.id}</td>
-										<td>{meal.date}</td>
-										<td>{meal['meal-name']}</td>
-										<td>{meal['total-calories']}</td>
-										<td>
-											<span className="icon" onClick={this.getDeleteMealFunc(meal.id)}>
-												{Icons.trash()}
-											</span>
-											<span className="icon" onClick={this.getEditMealFunc(meal.id)}>
-												{Icons.edit()}
-											</span>
-										</td>
-									</tr>
-								)
-							})}
+							{this.getTrList()}
 							</tbody>
 						</table>
 						<Meal changeCallback={this.listChange}

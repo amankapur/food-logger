@@ -20,3 +20,25 @@
 	}
 
 }
+.meal-container {
+	input, select {
+		margin-bottom: 12px;
+	}
+}
+
+
+table.slim {
+	thead, td, tr, tbody, th {
+		border: 0px;
+	}
+	td{
+		padding: 0px;
+		margin: 0px;
+		border: none;
+	}
+	input {
+		margin: 0px;
+		border-radius: 0px;
+		text-align: center;
+	}
+}

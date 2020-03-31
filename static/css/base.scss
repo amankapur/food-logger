@@ -1,5 +1,6 @@
 @import '~bootstrap';
 
+
 html {
 	height: 100%;
 	width: 100%;
@@ -47,4 +48,15 @@ select {
 .spinner-overlay {
 	background: white;
 	opacity: 0.5;
+}
+
+.pointer {
+	cursor: pointer;
+}
+
+.icon-tray {
+	.icon {
+		margin-right: 12px;
+		font-size: 1.2em;
+	}
 }

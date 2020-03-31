@@ -43,8 +43,8 @@ class FoodItem(db.Model):
 	def serialize(self):
 		return {
 			'id': self.id,
-			'fooditem_name': self.name,
-			'portionsize': self.portionsize,
+			'food-name': self.name,
+			'portion-size': self.portionsize,
 			'meal-id': self.meal_id,
 			'calories': self.calories
 		}
