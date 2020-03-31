@@ -15,6 +15,9 @@ export default class TopNav extends Component {
 			      <li className="nav-item active">
 			        <a className="nav-link" href="/home">Home</a>
 			      </li>
+			      <li className="nav-item active pull-right">
+			        <a className="nav-link" href="/auth/logout">Logout</a>
+			      </li>
 			    </ul>
 			  </div>
 			</nav>

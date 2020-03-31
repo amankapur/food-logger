@@ -7,10 +7,12 @@ auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 
 def login_required(view):
-
 	@functools.wraps(view)
 	def wrapped_view(**kwargs):
-		if session.get('user_id') is None:
+		uid = session.get('user_id')
+		user = User.get_by_id(uid)
+		if not all([uid, user]):
+			session.clear()
 			return redirect(url_for('auth.login'))
 
 		return view(**kwargs)
@@ -81,9 +83,7 @@ def login():
 	return render_template('auth.html')
 
 @auth_bp.route('/logout')
+@login_required
 def logout():
-	del session['user_id']
-	data = {'msg': 'Successfully logged out'}
-	r = make_response(jsonify(data), 200)
-	r.headers['Content-Type'] = 'application/json'
-	return r
+	session.clear()
+	return redirect(url_for("auth.login"))

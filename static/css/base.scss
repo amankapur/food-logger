@@ -16,3 +16,35 @@ h1, h2, h3, h4, h5, h6, p, ul {
 	margin: 0;
 	padding: 0;
 }
+
+.modal {
+	display: block;
+}
+
+.hide {
+	display: none;
+}
+
+select {
+	-webkit-appearance: none;
+}
+
+
+.icon {
+	cursor: pointer;
+	display: inline-block;
+}
+
+.relative {
+	position: relative;
+}
+
+.spinner-border {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+}
+.spinner-overlay {
+	background: white;
+	opacity: 0.5;
+}
