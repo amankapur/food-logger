@@ -93,7 +93,7 @@ export default class MealList extends Component {
 
 		return (
 			<tr className="pointer" key={meal.id} onClick={this.toggleExpand(meal)}>
-				<td>{this._isExpanded(meal) ? Icons.down() : Icons.right()} {meal.id}</td>
+				<td>{this._isExpanded(meal) ? Icons.down() : Icons.right()}</td>
 				<td>{meal.date}</td>
 				<td>{meal['meal-name']}</td>
 				<td>{meal['total-calories']}</td>
@@ -142,7 +142,7 @@ export default class MealList extends Component {
 			<div>
 				<Loading show={this.state.loading}/>
 				<div className={this.state.loading ? "spinner-overlay" : ''}>
-					<table className="table">
+					<table className="table meal-list">
 						<thead>
 							<tr>
 								<th>#</th>

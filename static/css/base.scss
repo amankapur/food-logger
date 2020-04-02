@@ -30,6 +30,11 @@ select {
 	-webkit-appearance: none;
 }
 
+.table {
+	td {
+		vertical-align: middle;
+	}
+}
 
 .icon {
 	cursor: pointer;

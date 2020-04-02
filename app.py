@@ -7,9 +7,21 @@ from model import *
 from views.auth import auth_bp, login_required
 from datetime import datetime
 
+
 def get_datetime_from_str(date_str):
 	arr = list(map(int, date_str.split('-')))
 	return datetime(arr[0], arr[1], arr[2])
+
+def make_error_response(e):
+	msg = str(e)
+	if type(e) == IntegrityError:
+
+		if Meal.UNIQ_USER_MEAL_CONSTRAINT in str(e.orig.args):
+			msg = 'Meal Type already exists for this date'
+
+	r = make_response(jsonify(data = msg), 400)
+	r.headers['Content-Type'] = 'application/json'
+	return r
 
 app = create_production_app()
 migrate = Migrate(app, db)
@@ -73,7 +85,13 @@ def create_meal():
 		meal_name = data['meal-type']
 		meal_date= get_datetime_from_str(data['meal-date'])
 
-		meal = Meal(name=meal_name, date=meal_date)
+		meal = None
+
+		try:
+			meal = Meal(name=meal_name, date=meal_date)
+		except Exception as e:
+			return make_error_response(e)
+
 		meal.user = user
 
 		db.session.add(meal)
@@ -82,13 +100,26 @@ def create_meal():
 			fooditem_name = fo['food-name']
 			fooditem_portionsize = fo['portion-size']
 			fooditeam_calories = fo['calories']
-			fooditem = FoodItem(name=fooditem_name, portionsize=fooditem_portionsize, calories=fooditeam_calories)
+			fooditem = None
+			try:
+				fooditem = FoodItem(name=fooditem_name, portionsize=fooditem_portionsize, calories=fooditeam_calories)
+			except Exception as e:
+				return make_error_response(e)
+
 			fooditem.meal = meal
 			db.session.add(fooditem)
 
-		db.session.commit()
+		try:
+			db.session.commit()
+		except Exception as e:
+			db.session.rollback()
+			return make_error_response(e)
 
 		return make_response(jsonify(data = [m.serialize for m in user.meals]), 200)
+
+
+
+
 
 @app_bp.route('/delete_meal/<id>', methods=['POST'])
 @login_required

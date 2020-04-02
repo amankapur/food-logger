@@ -42,3 +42,19 @@ table.slim {
 		text-align: center;
 	}
 }
+
+
+
+table.meal-list {
+	tbody {
+		tr {
+			background: #e9e9e9;
+		}
+		tr.inner {
+			padding-top: 0.5rem;
+			padding-bottom: 0.5rem;
+			font-size: 0.9em;
+			background: none;
+		}
+	}
+}

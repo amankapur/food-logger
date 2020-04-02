@@ -95,7 +95,7 @@ export default class Meal extends Component {
 			url: self.props.id ? '/meal/'+self.props.id : '/create_meal',
 			data: JSON.stringify(s),
 			contentType: 'application/json',
-    	dataType: 'json',
+			dataType: 'json',
 			success: (data) => {
 				self.props.changeCallback(data['data'])
 				console.log(data)
@@ -114,6 +114,20 @@ export default class Meal extends Component {
 			'calories': ''
 		})
 		this.setState(this.state)
+	}
+	deleteFoodItem(i) {
+		return (e) => {
+			e.stopPropagation()
+			e.preventDefault()
+			let fooditems = []
+			_.each(this.state.fooditems, (f, j) => {
+				if (j != i) {
+					fooditems.push(f)
+				}
+			})
+			this.state.fooditems = fooditems
+			this.setState(this.state)
+		}
 	}
 	clickedButton(tp) {
 		if (tp == 'Save') {
@@ -138,6 +152,7 @@ export default class Meal extends Component {
 
 	render() {
 		let title = this.props.id ? "Edit Meal " + this.props.id : "Add Meal"
+		console.log(this.state['meal-date'])
 		return (
 			<Modal buttonTitle="+ Add Meal"
 						 header={<h4 className="modal-title">{title}</h4>}
@@ -154,15 +169,16 @@ export default class Meal extends Component {
 					<select value={this.state['meal-type']}
 									onChange={this.getSetFunc('meal-type')}
 									className="custom-select">
-	          <option value = '' disabled>Select Meal Type</option>
-						<option value = 'Breakfast'>Breakfast</option>
-						<option value = 'Lunch'>Lunch</option>
-						<option value = 'Dinner'>Dinner</option>
-						<option value = 'Snack'>Snack</option>
+						<option value='' disabled>Select Meal Type</option>
+						<option value='Breakfast'>Breakfast</option>
+						<option value='Lunch'>Lunch</option>
+						<option value='Dinner'>Dinner</option>
+						<option value='Snack'>Snack</option>
 					</select>
 
 					<input
 							className="form-control"
+							type="date"
 							placeholder="Enter meal date"
 							value={this.state['meal-date']}
 							onChange={this.getSetFunc('meal-date')}
@@ -172,13 +188,15 @@ export default class Meal extends Component {
 						<thead>
 							<tr>
 								<th>
-									<div className="icon float-left" onClick={this.addFoodItem}>
-										{Icons.plus()}
-									</div>
 									Food Name
 								</th>
 								<th>Portion Size</th>
 								<th>Calories</th>
+								<th>
+									<div className="icon" onClick={this.addFoodItem}>
+										{Icons.plus()}
+									</div>
+								</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -208,6 +226,11 @@ export default class Meal extends Component {
 												value={fooditem.calories}
 												onChange={this.getSetFunc('fooditems['+i+'].'+'calories')}
 												name="calolries"/>
+										</td>
+										<td>
+											<div className="icon" onClick={this.deleteFoodItem(i)}>
+												{Icons.trash()}
+											</div>
 										</td>
 									</tr>
 								)
