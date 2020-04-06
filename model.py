@@ -60,6 +60,10 @@ class FoodItem(db.Model):
 			raise AssertionError("Calories must greater than 0")
 		return calories
 
+	@staticmethod
+	def get_by_id(id):
+		return db.session.query(FoodItem).filter_by(id=id).scalar()
+
 class Meal(db.Model):
 
 
@@ -88,11 +92,11 @@ class Meal(db.Model):
 
 		return {
 			'id'         : self.id,
-			'meal-name'  : self.name,
+			'meal-type'  : self.name,
 			'user-id'		 : self.user_id,
 			'fooditems'	 : [fi.serialize for fi in self.fooditems],
 			'total-calories': self.total_calories,
-			'date' :  "{}-{}-{}".format(self.date.year, m, d)
+			'meal-date' :  "{}-{}-{}".format(self.date.year, m, d)
 		}
 
 	@hybrid_property

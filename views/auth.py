@@ -2,6 +2,7 @@ import functools
 from flask import Blueprint, make_response, jsonify, session, redirect, url_for, render_template, request
 from config import db
 from model import User
+import time
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -9,6 +10,7 @@ auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 def login_required(view):
 	@functools.wraps(view)
 	def wrapped_view(**kwargs):
+		# time.sleep(1.5)
 		uid = session.get('user_id')
 		user = User.get_by_id(uid)
 		if not all([uid, user]):

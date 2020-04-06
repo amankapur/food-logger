@@ -7,13 +7,14 @@ export default class Loading extends Component {
 	}
 
 	render() {
-		if (!this.props.show) {
-			return null
-		}
-
+		let klass = this.props.show ? "spinner-border" : ''
+		let contentClass = this.props.show ? "spinner-overlay" : ''
 		return (
-			<div className="spinner-border" role="status">
-				<span className="sr-only">Loading...</span>
+			<div>
+				<div className={klass}/>
+				<div className={contentClass}>
+					{this.props.children}
+				</div>
 			</div>
 		)
 	}

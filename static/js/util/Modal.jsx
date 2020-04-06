@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import $ from 'jquery'
 import _ from 'underscore'
 
 export default class Modal extends Component {
@@ -14,15 +13,12 @@ export default class Modal extends Component {
 		if (this.props.open) {
 			modal_class = ''
 		}
-		return modal_class  + ' ' + this.props.className
+		return modal_class  + ' ' + this.props.className ? this.props.className : ''
 	}
 	getDialogClass() {
 		let s = ''
-		if (this.props.hasOwnProperty('centered') || this.props.centered) {
-			s += 'modal-dialog-centered '
-		}
-		if (this.props.hasOwnProperty('modalDialogClass')) {
-			s += this.props.modalDialogClass
+		if (this.props.hasOwnProperty('centered')) {
+			s += 'modal-dialog-centered'
 		}
 		return s
 	}
@@ -64,8 +60,18 @@ export default class Modal extends Component {
 
 							<div className={"modal-footer " + this.getFooterClass()}>
 								{_.map(this.props.footer, (name) => {
+									let disabled = false
+									if (name.search('-disabled') > -1) {
+										name = name.split('-')[0]
+										disabled = true
+									}
 									return (
-										<button type="button" name={name} key={name} onClick={this.footerButtonClick} className="btn btn-primary">{name}</button>
+										<button type="button"
+														name={name}
+														key={name}
+														onClick={this.footerButtonClick}
+														className="btn btn-primary"
+														disabled={disabled}>{name}</button>
 									)
 								})}
 							</div>

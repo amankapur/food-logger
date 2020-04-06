@@ -45,32 +45,61 @@ def meallist():
 	return r
 
 
-@app_bp.route('/meal/<id>/', methods=['GET', 'POST'])
+@app_bp.route('/meal/', methods=['GET', 'POST'])
 @login_required
-def meal(id):
-	meal = Meal.get_by_id(id)
+def meal():
 
 	if request.method == 'GET':
+		id = request.args.get('id')
+		meal = Meal.get_by_id(id)
 		return make_response(jsonify(data = meal.serialize), 200)
 
-	user_id = session.get('user_id')
-	user = User.get_by_id(user_id)
+	if request.method == 'POST':
 
-	data = request.form.to_dict()
+		user_id = session.get('user_id')
+		user = User.get_by_id(user_id)
 
-	meal.name = data['meal-type']
-	meal.date = get_datetime_from_str(data['meal-date'])
+		data = request.json
+		id = data['id']
+		meal = Meal.get_by_id(id)
 
-	fooditem = meal.fooditems[0]
-	fooditem.name = data['food-name']
-	fooditem.portionsize = data['portion-size']
-	fooditem.calories = data['calories']
+		meal.name = data['meal-type']
+		meal.date = get_datetime_from_str(data['meal-date'])
 
-	db.session.add(meal)
-	db.session.add(fooditem)
-	db.session.commit()
+		new_ids = []
 
-	return make_response(jsonify(data = [m.serialize for m in user.meals]), 200)
+		# update any fo changes
+		for fo in data['fooditems']:
+			if 'id' in fo:
+				new_ids.append(fo['id'])
+				fooditem = FoodItem.get_by_id(fo['id'])
+				fooditem.name = fo['food-name']
+				fooditem.portionsize = fo['portion-size']
+				fooditem.calories = fo['calories']
+				db.session.add(fooditem)
+
+		# delete any existing fo
+		for fo in meal.fooditems:
+			if fo.id not in new_ids:
+				db.session.delete(fo)
+
+		# add new fo
+		for fo in data['fooditems']:
+			if 'id' not in fo:
+				try:
+					fooditem = FoodItem(name=fo['food-name'], portionsize=fo['portion-size'], calories=fo['calories'])
+					fooditem.meal = meal
+					db.session.add(fooditem)
+				except Exception as e:
+					return make_error_response(e)
+
+
+		db.session.add(meal)
+		db.session.commit()
+
+		r = make_response(jsonify(data = [m.serialize for m in user.meals]), 200)
+		r.headers['Content-Type'] = 'application/json'
+		return r
 
 
 @app_bp.route('/create_meal', methods=['POST'])
@@ -97,12 +126,9 @@ def create_meal():
 		db.session.add(meal)
 
 		for fo in data['fooditems']:
-			fooditem_name = fo['food-name']
-			fooditem_portionsize = fo['portion-size']
-			fooditeam_calories = fo['calories']
 			fooditem = None
 			try:
-				fooditem = FoodItem(name=fooditem_name, portionsize=fooditem_portionsize, calories=fooditeam_calories)
+				fooditem = FoodItem(name=fo['food-name'], portionsize=fo['portion-size'], calories=fo['calories'])
 			except Exception as e:
 				return make_error_response(e)
 
@@ -121,10 +147,12 @@ def create_meal():
 
 
 
-@app_bp.route('/delete_meal/<id>', methods=['POST'])
+@app_bp.route('/delete_meal', methods=['POST'])
 @login_required
-def delete_meal(id):
+def delete_meal():
 	if request.method == 'POST':
+		id = request.json['id']
+
 		meal = Meal.get_by_id(id)
 
 		user_id = session.get('user_id')

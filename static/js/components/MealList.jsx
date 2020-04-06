@@ -1,78 +1,59 @@
 import React, { Component } from 'react'
-import $ from 'jquery'
 import _ from 'underscore'
 import Modal from '../util/Modal'
 import Icons from '../util/Icons'
 import Loading from '../util/Loading'
-import Meal from './Meal'
+import MealModal from './Meal'
+import MealList from '../models/MealList'
+import Meal from '../models/Meal'
+import Data from '../util/Data'
 
-export default class MealList extends Component {
+export default class MealListTable extends Component {
 
-	get_list() {
-		const self = this
-		$.get({
-			url: '/meallist',
-			success: (data) => {
-				console.log('successfully fetched meal list')
-				console.log(data['data'])
-				self.setState({
-					loading: false,
-					mealList: data['data']
-				})
-			},
-			fail: (data) => {
-				console.log('error fetching meal list')
-				console.log(data)
-			}
-		})
-	}
 
 	constructor(props) {
 		super(props)
-		this.state = {
-			loading: true,
-			mealList: [],
-			mealID: null,
-			expanded: []
-		}
-		this.get_list()
+
 		this.listChange = this.listChange.bind(this)
 		this.closeMeal = this.closeMeal.bind(this)
+
+		this.state = {
+			loading: true,
+			meals: new MealList(this.listChange),
+			selectedMeal: new Meal(),
+			expanded: []
+
+		}
 	}
 
-	listChange(data) {
-		this.setState({
-			loading: false,
-			mealList: data,
-		})
-	}
-
-	closeMeal() {
-		this.state['mealID'] = null
+	listChange(meals) {
+		this.state.meals.all = meals
+		this.state.loading = false
+		this.state.selectedMeal = new Meal()
 		this.setState(this.state)
 	}
 
-	deleteMeal(id) {
-		const self = this
+	closeMeal() {
+		console.log('before list change')
+		console.log(this.state.meals.all)
+		this.listChange(this.state.meals.all)
+	}
+
+	deleteMeal(meal) {
 		return (e) => {
 			e.preventDefault()
 			e.stopPropagation()
-			return $.post({
-				url: '/delete_meal/' + id,
-				success: (data) => {
-					console.log('successfully deleted meal')
-					self.listChange(data['data'])
-				}
+			meal.delete((meals)=>{
+				this.listChange(meals)
 			})
 		}
 	}
-	editMeal(id) {
-		const self = this
+	editMeal(meal) {
 		return (e) => {
 			e.preventDefault()
 			e.stopPropagation()
-			self.state['mealID'] = id
-			self.setState(self.state)
+			this.state.selectedMeal = meal.clone()
+			this.setState(this.state)
 		}
 	}
 	toggleExpand(meal) {
@@ -94,15 +75,15 @@ export default class MealList extends Component {
 		return (
 			<tr className="pointer" key={meal.id} onClick={this.toggleExpand(meal)}>
 				<td>{this._isExpanded(meal) ? Icons.down() : Icons.right()}</td>
-				<td>{meal.date}</td>
-				<td>{meal['meal-name']}</td>
+				<td>{meal['meal-date']}</td>
+				<td>{meal['meal-type']}</td>
 				<td>{meal['total-calories']}</td>
 				<td>
 					<span className="icon-tray">
-						<span className="icon" onClick={this.deleteMeal(meal.id)}>
+						<span className="icon" onClick={this.deleteMeal(meal)}>
 							{Icons.trash()}
 						</span>
-						<span className="icon" onClick={this.editMeal(meal.id)}>
+						<span className="icon" onClick={this.editMeal(meal)}>
 							{Icons.edit()}
 						</span>
 					</span>
@@ -125,7 +106,7 @@ export default class MealList extends Component {
 	}
 	getTrList() {
 		let list = []
-		_.each(this.state.mealList, (meal) => {
+		_.each(this.state.meals.all, (meal) => {
 			list.push(this.getMainRow(meal))
 
 			if (this._isExpanded(meal)) {
@@ -139,8 +120,7 @@ export default class MealList extends Component {
 
 	render() {
 		return (
-			<div>
-				<Loading show={this.state.loading}/>
+			<Loading show={this.state.loading}>
 				<div className={this.state.loading ? "spinner-overlay" : ''}>
 					<table className="table meal-list">
 						<thead>
@@ -151,16 +131,16 @@ export default class MealList extends Component {
 								<th>Total Calories</th>
 								<th/>
 							</tr>
-							</thead>
-							<tbody>
+						</thead>
+						<tbody>
 							{this.getTrList()}
-							</tbody>
-						</table>
-						<Meal changeCallback={this.listChange}
-								  hideCallback={this.closeMeal}
-								  id={this.state.mealID}/>
+						</tbody>
+					</table>
+					<MealModal changeCallback={this.listChange}
+							  hideCallback={this.closeMeal}
+							  meal={this.state.selectedMeal}/>
 				</div>
-			</div>
+			</Loading>
 		)
 	}
 }

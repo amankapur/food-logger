@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter, Route } from 'react-router-dom';
-import MealList from './components/MealList';
+import MealListTable from './components/MealList';
 import TopNav from './components/TopNav';
 
 import style from '../css/app.scss'
@@ -11,7 +11,7 @@ const App = (
 		<TopNav />
 		<BrowserRouter >
 			<div id="content">
-				<Route path='/' component={MealList} />
+				<Route path='/' component={MealListTable} />
 				{/*<Route path='/meal/:meal_id' component={Meal} />*/}
 			</div>
 		</BrowserRouter>
