@@ -1,80 +1,66 @@
 import React, { Component } from 'react';
 import _ from 'underscore'
+import { connect } from "react-redux"
+import {Modal as ModalReducer} from "../reducers/modal"
+import Loading from '../util/Loading'
 
-export default class Modal extends Component {
+
+class ModalHeader extends Component {
+	render() {
+		return (
+			<div className={"modal-header " + (this.props.className || '')}>
+				<h4 className="modal-title">{this.props.title}</h4>
+				{this.props.children}
+			</div>
+		)
+	}
+}
+
+class ModalBody extends Component {
+	render() {
+		return (
+			<div className={"modal-body " + (this.props.className || '')}>
+				{this.props.children}
+			</div>
+		)
+	}
+}
+
+class ModalFooter extends Component {
+	render() {
+		return (
+			<div className={"modal-footer " + (this.props.className || '')}>
+				{this.props.children}
+			</div>
+		)
+	}
+}
+
+
+class Modal extends Component {
 
 	constructor(props){
 		super(props)
-		this.footerButtonClick = this.footerButtonClick.bind(this)
 	}
 
-	getModalClass(){
-		let modal_class = 'hide'
-		if (this.props.open) {
-			modal_class = ''
+	modalAction(name) {
+		return (e) => {
+			e.preventDefault()
+			e.stopPropagation()
+			this.props.dispatch(ModalReducer.actions[name]())
 		}
-		return modal_class  + ' ' + this.props.className ? this.props.className : ''
 	}
-	getDialogClass() {
-		let s = ''
-		if (this.props.hasOwnProperty('centered')) {
-			s += 'modal-dialog-centered'
-		}
-		return s
-	}
-	getFooterClass() {
-		let s = ''
-		if (this.props.hasOwnProperty('hide-footer') || !this.props.hasOwnProperty('footer')) {
-			s += 'hide'
-		}
-		return s
-	}
-	footerButtonClick(e) {
-		e.preventDefault()
-		const name = e.target['name']
-		const self = this
 
-		this.props.footerCallback(name)
-
-		if (name == 'Close') {
-			this.props.hideModal()
-		}
-
-	}
 	render() {
 		let modalContent = null
 		if (this.props.open) {
 			modalContent = (
-				<div className={"modal " + this.getModalClass()}>
-					<div className={"modal-dialog " + this.getDialogClass()}>
+				<div className="modal">
+					<div className="modal-dialog modal-dialog-centered">
 						<div className="modal-content">
-
-							<div className="modal-header">
-								{this.props.header}
-								<button type="button" className="close" onClick={this.props.hideModal}>&times;</button>
-							</div>
-
-							<div className="modal-body">
+							<Loading show={this.props.loading}>
 								{this.props.children}
-							</div>
-
-							<div className={"modal-footer " + this.getFooterClass()}>
-								{_.map(this.props.footer, (name) => {
-									let disabled = false
-									if (name.search('-disabled') > -1) {
-										name = name.split('-')[0]
-										disabled = true
-									}
-									return (
-										<button type="button"
-														name={name}
-														key={name}
-														onClick={this.footerButtonClick}
-														className="btn btn-primary"
-														disabled={disabled}>{name}</button>
-									)
-								})}
-							</div>
+							</Loading>
 						</div>
 					</div>
 				</div>
@@ -83,14 +69,25 @@ export default class Modal extends Component {
 
 		return (
 			<div>
-				<div >
-					<button className='btn btn-primary' onClick={this.props.showModal}>
-						{this.props.buttonTitle}
-					</button>
-				</div>
+				<button className='btn btn-outline-dark btm-small'
+								onClick={this.modalAction('open')}>
+					{this.props.buttonTitle}
+				</button>
 				{modalContent}
 			</div>
 		)
 	}
 
 }
+
+const mapStateToProps = (state) => {
+	return {
+	  open: state.Modal.open,
+	  loading: state.Modal.loading
+	}
+};
+
+const ModalComp = connect(mapStateToProps)(Modal)
+const ModalHeaderComp = connect(null)(ModalHeader)
+
+export {ModalFooter, ModalHeaderComp as ModalHeader, ModalBody, ModalComp as Modal}

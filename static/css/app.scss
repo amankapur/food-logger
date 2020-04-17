@@ -10,6 +10,7 @@
 		top: 0px;
 		height: 50px;
 		margin-bottom: 50px;
+		z-index: 9999;
 	}
 
 	#content  {
@@ -35,6 +36,7 @@ table.slim {
 		padding: 0px;
 		margin: 0px;
 		border: none;
+		background-color: white;
 	}
 	input {
 		margin: 0px;
@@ -56,5 +58,9 @@ table.meal-list {
 			font-size: 0.9em;
 			background: none;
 		}
+	}
+	th.slim {
+		padding: 0px;
+		padding-bottom: 3px;
 	}
 }

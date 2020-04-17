@@ -1,90 +1,67 @@
 import React, { Component } from 'react'
 import _ from 'underscore'
-import Modal from '../util/Modal'
+import {Modal, ModalHeader, ModalFooter, ModalBody} from '../util/Modal'
 import Icons from '../util/Icons'
-import Loading from '../util/Loading'
+
 import Data from '../util/Data'
 import If from '../util/If'
-import Meal from '../models/Meal'
+import MealList from "../reducers/meallist"
+import Meal from "../reducers/meal"
+import { connect } from "react-redux"
+import {Modal as ModalReducer} from "../reducers/modal"
+
+
+const mapStateToProps = (state) => {
+	return {
+	  meal: state.Meal,
+	}
+};
 
 
 class MealForm extends Component {
 
 	constructor(props) {
 		super(props)
-		this.state = {
-			meal: this.props.meal
-		}
-		this.saveForm = this.saveForm.bind(this)
 		this.addFoodItem = this.addFoodItem.bind(this)
 		this.deleteFoodItem = this.deleteFoodItem.bind(this)
-	}
-
-	componentDidUpdate(prevProps, prevState) {
-		if (this.state.meal.id != this.props.meal.id) {
-			this.setState({
-				meal: this.props.meal
-			})
-		}
 	}
 
 	getSetFunc(name, e) {
 		return (e) => {
 			e.preventDefault()
-			if (name.search("fooditems") == -1) {
-				this.state.meal[name] = e.target.value
-			}
-			else {
-				let foIdx = parseInt(name.split('[')[1].split('].')[0])
-				let fo_param = name.split('[')[1].split('].')[1]
-				this.state.meal.fooditems[foIdx][fo_param] = e.target.value
-			}
+			this.props.dispatch(Meal.actions.set(name, e.target.value))
+		}
+	}
 
-			this.setState(this.state)
+	getSetFoodItemFunc(i, name) {
+		return (e) => {
+			e.preventDefault()
+			let val = e.target.value
+			let fooditems = this.props.meal.fooditems
+			fooditems[i][name] = val
+			this.props.dispatch(Meal.actions.set('fooditems', fooditems))
 		}
 	}
 
 	addFoodItem(e) {
 		e.preventDefault()
 		e.stopPropagation()
-		this.state.meal.fooditems.push({
-			'food-name': '',
-			'portion-size': '',
-			'calories': ''
-		})
-		this.setState(this.state)
+		this.props.dispatch(Meal.actions.addFoodItem())
 	}
 
-	deleteFoodItem(i) {
+	deleteFoodItem(fo) {
 		return (e) => {
 			e.stopPropagation()
 			e.preventDefault()
-			let fooditems = []
-			_.each(this.state.meal.fooditems, (f, j) => {
-				if (j != i) {
-					fooditems.push(f)
-				}
-			})
-			this.state.meal.fooditems = fooditems
-			this.setState(this.state)
+			this.props.dispatch(Meal.actions.deleteFoodItem(fo))
 		}
 	}
 
-	saveForm(e) {
-		e.preventDefault()
-		e.stopPropagation()
-		if (this.state.meal.checkValidity()) {
-			this.props.loading(true)
-			this.state.meal.save((meals) =>{
-				this.props.changeCallback(meals)
-			})
-		}
-	}
 
 	render() {
 		return (
 			<div className="meal-container">
-				<select value={this.state.meal['meal-type']}
+				<select value={this.props.meal['meal-type']}
 								onChange={this.getSetFunc('meal-type')}
 								className="custom-select">
 					<option value='' disabled>Select Meal Type</option>
@@ -98,7 +75,7 @@ class MealForm extends Component {
 						className="form-control"
 						type="date"
 						placeholder="Enter meal date"
-						value={this.state.meal['meal-date']}
+						value={this.props.meal['meal-date']}
 						onChange={this.getSetFunc('meal-date')}
 						name="meal-date"/>
 
@@ -118,7 +95,7 @@ class MealForm extends Component {
 						</tr>
 					</thead>
 					<tbody>
-						{_.map(this.state.meal.fooditems, (fooditem, i) => {
+						{_.map(this.props.meal.fooditems, (fooditem, i) => {
 							return (
 								<tr key={i}>
 									<td>
@@ -126,7 +103,7 @@ class MealForm extends Component {
 											type="text"
 											className="form-control"
 											value={fooditem['food-name']}
-											onChange={this.getSetFunc('fooditems['+i+'].'+'food-name')}
+											onChange={this.getSetFoodItemFunc(i, 'food-name')}
 											name="food-name"/>
 									</td>
 									<td>
@@ -134,7 +111,7 @@ class MealForm extends Component {
 											type="text"
 											className="form-control"
 											value={fooditem['portion-size']}
-											onChange={this.getSetFunc('fooditems['+i+'].'+'portion-size')}
+											onChange={this.getSetFoodItemFunc(i, 'portion-size')}
 											name="portion-size"/>
 									</td>
 									<td>
@@ -142,12 +119,12 @@ class MealForm extends Component {
 											className="form-control"
 											type="number"
 											value={fooditem.calories}
-											onChange={this.getSetFunc('fooditems['+i+'].'+'calories')}
-											name="calolries"/>
+											onChange={this.getSetFoodItemFunc(i, 'calories')}
+											name="calories"/>
 									</td>
 									<td>
-										<If show={this.state.meal.fooditems.length >= 2}>
-											<div className="icon" onClick={this.deleteFoodItem(i)}>
+										<If show={this.props.meal.fooditems.length >= 2}>
+											<div className="icon" onClick={this.deleteFoodItem(fooditem)}>
 												{Icons.trash()}
 											</div>
 										</If>
@@ -157,81 +134,77 @@ class MealForm extends Component {
 						})}
 					</tbody>
 				</table>
-				<button type="button"
-						name="Save"
-						onClick={this.saveForm}
-						className="btn btn-primary"
-						disabled={!this.state.meal.checkValidity()}>
-						Save
-				</button>
 			</div>
 		)
 	}
 
 }
+MealForm = connect(mapStateToProps)(MealForm)
 
 
-export default class MealModal extends Component {
+class MealModal extends Component {
 
 	constructor(props) {
 		super(props)
-
-		this.state = {
-			'loading': false,
-			'showModal': this.props.meal.id ? true : false
-		}
-
-		this.hideModal = this.hideModal.bind(this)
-		this.setLoading = this.setLoading.bind(this)
-		this.setShowModal = this.setShowModal.bind(this)
-		this.changeCallback = this.changeCallback.bind(this)
+		this.saveMeal = this.saveMeal.bind(this)
 	}
 
-	componentDidUpdate(prevProps, prevState) {
-		if (prevProps.meal.id != this.props.meal.id && this.props.meal.id != null) {
-			this.setShowModal(true)
+	modalAction(name) {
+		return (e) => {
+			e.preventDefault()
+			e.stopPropagation()
+			this.props.dispatch(ModalReducer.actions[name]())
+			if (name == 'close') {
+				this.props.dispatch(Meal.actions.unselectMeal())
+			}
 		}
 	}
-
-	setLoading(val) {
-		this.setState({
-			loading: val
-		})
+	saveMeal(e) {
+		e.preventDefault()
+		e.stopPropagation()
+		if (Meal.checkValidity(this.props.meal)) {
+			this.props.dispatch(ModalReducer.actions.loading(true))
+			Meal.save(this.props.meal, (meals) =>{
+				this.props.dispatch(MealList.actions.getListSuccess(meals))
+				this.props.dispatch(ModalReducer.actions.loading(false))
+				this.props.dispatch(ModalReducer.actions.close())
+			})
+		}
 	}
-
-	setShowModal(val) {
-		this.setState({
-			showModal: val
-		})
-	}
-
-	hideModal() {
-		this.setShowModal(false)
-		this.props.hideCallback()
-	}
-	changeCallback(meals) {
-		this.setLoading(false)
-		this.setShowModal(false)
-		this.props.changeCallback(meals)
-	}
-
 
 	render() {
+
 		let title = this.props.meal.id ? "Edit Meal " + this.props.meal.id : "Add Meal"
 
 		return (
-			<Loading show={this.state.loading}>
-				<Modal buttonTitle="+ Add Meal"
-							 header={<h4 className="modal-title">{title}</h4>}
-							 centered
-							 open={this.state.showModal}
-							 hideModal={this.hideModal}
-							 showModal={()=>{this.setShowModal(true)}}>
-					<MealForm meal={this.props.meal}
-										loading={this.setLoading}
-										changeCallback={this.changeCallback}/>
-				</Modal>
-			</Loading>
+			<Modal buttonTitle="+ Add Meal">
+				<ModalHeader title={title}>
+					<button type="button"
+								className="close"
+								onClick={this.modalAction('close')}>&times;</button>
+				</ModalHeader>
+
+				<ModalBody>
+					<MealForm />
+				</ModalBody>
+
+				<ModalFooter>
+					<button type="button"
+						name="Save"
+						onClick={this.saveMeal}
+						className="btn btn-primary"
+						disabled={!Meal.checkValidity(this.props.meal)}>
+						Save
+					</button>
+					<button className="btn btn-primary"
+									onClick={this.modalAction('close')}>
+						Close
+					</button>
+				</ModalFooter>
+			</Modal>
 		)
 	}
 }
+
+
+export default connect(mapStateToProps)(MealModal)

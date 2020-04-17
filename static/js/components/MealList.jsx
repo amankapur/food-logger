@@ -1,59 +1,50 @@
 import React, { Component } from 'react'
 import _ from 'underscore'
-import Modal from '../util/Modal'
 import Icons from '../util/Icons'
 import Loading from '../util/Loading'
 import MealModal from './Meal'
-import MealList from '../models/MealList'
-import Meal from '../models/Meal'
+
 import Data from '../util/Data'
 
-export default class MealListTable extends Component {
+import MealList from "../reducers/meallist"
+import Meal from "../reducers/meal"
+import {Modal} from "../reducers/modal"
+import { connect } from "react-redux"
+
+
+class MealListTable extends Component {
 
 
 	constructor(props) {
 		super(props)
 
-		this.listChange = this.listChange.bind(this)
 		this.closeMeal = this.closeMeal.bind(this)
 
 		this.state = {
-			loading: true,
-			meals: new MealList(this.listChange),
-			selectedMeal: new Meal(),
 			expanded: []
-
 		}
-	}
 
-	listChange(meals) {
-		this.state.meals.all = meals
-		this.state.loading = false
-		this.state.selectedMeal = new Meal()
-		this.setState(this.state)
+		this.props.dispatch(MealList.getList())
 	}
 
 	closeMeal() {
-		console.log('before list change')
-		console.log(this.state.meals.all)
-		this.listChange(this.state.meals.all)
+		this.props.dispatch(Meal.actions.unselectMeal())
+		this.props.dispatch(Modal.actions.close())
 	}
 
 	deleteMeal(meal) {
 		return (e) => {
 			e.preventDefault()
 			e.stopPropagation()
-			meal.delete((meals)=>{
-				this.listChange(meals)
-			})
+			this.props.dispatch(MealList.delete(meal))
 		}
 	}
 	editMeal(meal) {
 		return (e) => {
 			e.preventDefault()
 			e.stopPropagation()
-			this.state.selectedMeal = meal.clone()
-			this.setState(this.state)
+			this.props.dispatch(Meal.actions.selectMeal(meal))
+			this.props.dispatch(Modal.actions.open())
 		}
 	}
 	toggleExpand(meal) {
@@ -106,7 +97,7 @@ export default class MealListTable extends Component {
 	}
 	getTrList() {
 		let list = []
-		_.each(this.state.meals.all, (meal) => {
+		_.each(this.props.meals, (meal) => {
 			list.push(this.getMainRow(meal))
 
 			if (this._isExpanded(meal)) {
@@ -120,8 +111,8 @@ export default class MealListTable extends Component {
 
 	render() {
 		return (
-			<Loading show={this.state.loading}>
-				<div className={this.state.loading ? "spinner-overlay" : ''}>
+			<Loading show={this.props.loading}>
+				<div className={this.props.loading ? "spinner-overlay" : ''}>
 					<table className="table meal-list">
 						<thead>
 							<tr>
@@ -129,18 +120,28 @@ export default class MealListTable extends Component {
 								<th>Meal Date</th>
 								<th>Meal Name</th>
 								<th>Total Calories</th>
-								<th/>
+								<th className="slim">
+									<MealModal hideCallback={this.closeMeal}/>
+								</th>
 							</tr>
 						</thead>
 						<tbody>
 							{this.getTrList()}
 						</tbody>
 					</table>
-					<MealModal changeCallback={this.listChange}
-							  hideCallback={this.closeMeal}
-							  meal={this.state.selectedMeal}/>
 				</div>
 			</Loading>
 		)
 	}
 }
+
+const mapStateToProps = (state) => {
+	return {
+	  meals: state.MealList.all,
+	  loading: state.MealList.loading,
+	  error: state.MealList.error,
+	  selectedMeal: state.Meal
+	}
+};
+
+export default connect(mapStateToProps)(MealListTable)
