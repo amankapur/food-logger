@@ -1,8 +1,17 @@
 pipeline {
+	agent any
   stages {
+  	stage('checkout') {
+  		checkout scm
+  	}
     stage('build') {
       steps {
-        sh 'pip install -r requirements.txt'
+      	sh 'virtualenv ENV'
+      	sh 'source env/bin/activate'
+      	sh 'pip install -r requirements.txt'
+      	sh 'cd static'
+      	sh 'npm install'
+      	sh 'npm run build'
       }
     }
     stage('run') {
