@@ -1,7 +1,7 @@
 pipeline {
 	agent any
   environment {
-    PATH = "PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    PATH = "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
   }
   stages {
   	stage('checkout') {
@@ -11,7 +11,7 @@ pipeline {
   	}
     stage('build') {
       steps {
-        sh script: 'echo $PATH'
+        echo '$PATH'
         // sh 'PATH="/usr/local/bin:${PATH}"'
         // sh script: 'echo $PATH'
       	sh 'virtualenv ENV'
