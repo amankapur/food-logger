@@ -12,7 +12,7 @@ pipeline {
         // sh 'PATH="/usr/local/bin:${PATH}"'
         sh script: 'echo $PATH'
       	sh 'python3 -m virtualenv --python=python3 ENV'
-      	sh 'source ENV/bin/activate'
+      	. './ENV/bin/activate'
       	sh 'pip install -r requirements.txt'
       	sh 'cd static'
       	sh 'npm install'
