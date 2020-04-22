@@ -11,17 +11,12 @@ pipeline {
         // echo '$PATH'
         // sh 'PATH="/usr/local/bin:${PATH}"'
         sh script: 'echo $PATH'
-      	sh 'virtualenv ENV'
-      	sh 'source env/bin/activate'
+      	sh 'python3 -m virtualenv ENV'
+      	sh 'source ENV/bin/activate'
       	sh 'pip install -r requirements.txt'
       	sh 'cd static'
       	sh 'npm install'
       	sh 'npm run build'
-      }
-    }
-    stage('run') {
-      steps {
-        sh 'python app.py'
       }
     }
   }
