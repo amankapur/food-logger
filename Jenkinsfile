@@ -8,6 +8,7 @@ pipeline {
   	}
     stage('build') {
       steps {
+        sh 'PATH="/usr/local/bin:$PATH"'
       	sh 'virtualenv ENV'
       	sh 'source env/bin/activate'
       	sh 'pip install -r requirements.txt'
