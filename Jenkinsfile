@@ -19,10 +19,7 @@ pipeline {
           pip3 install -r requirements.txt
           cd static
           npm install
-          npm run build
-          cd static/js/
-          npm install
-          npm run build
+          npm run build          
         """
       }
     }
