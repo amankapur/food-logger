@@ -167,11 +167,8 @@ def delete_meal():
 		return make_response(jsonify(data = [m.serialize for m in user.meals]), 200)
 
 
+app.register_blueprint(auth_bp)
+app.register_blueprint(app_bp)
 
 if __name__ == "__main__":
-
-	db.create_all()
-
-	app.register_blueprint(auth_bp)
-	app.register_blueprint(app_bp)
-	app.run(debug=True)
+	app.run(debug=True,host='0.0.0.0',port='5000')

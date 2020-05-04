@@ -28,5 +28,23 @@ pipeline {
         """
       }
     }
+    stage('deploy:staging') {
+      steps {
+        sh """
+          cd
+          git clone https://github.com/amankapur/food-logger
+          cd food-logger
+          pip3 install virtualenv
+          python3 -m virtualenv --python=python3 ENV
+          source ENV/bin/activate
+          pip3 install wheel
+          pip3 install flaskr-1.0.0-py3-none-any.whl
+          export FLASK_APP=flaskr
+          flask init-db
+          pip3 install waitress
+          waitress-serve --call 'flaskr:create_app'
+        """
+      }
+    }
   }
 }
